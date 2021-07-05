@@ -99,12 +99,17 @@ void find_feature_matches ( const Mat& img_1, const Mat& img_2,
     double min_dist=10000, max_dist=0;
 
     //找出所有匹配之间的最小距离和最大距离, 即是最相似的和最不相似的两组点之间的距离
+#if 0
     for ( int i = 0; i < descriptors_1.rows; i++ )
     {
         double dist = match[i].distance;
         if ( dist < min_dist ) min_dist = dist;
         if ( dist > max_dist ) max_dist = dist;
     }
+#else
+    min_dist = min_element( match.begin(), match.end(), [](const DMatch& m1, const DMatch& m2) {return m1.distance<m2.distance;} )->distance;
+    max_dist = max_element( match.begin(), match.end(), [](const DMatch& m1, const DMatch& m2) {return m1.distance<m2.distance;} )->distance;
+#endif
 
     printf ( "-- Max dist : %f \n", max_dist );
     printf ( "-- Min dist : %f \n", min_dist );
@@ -122,6 +127,7 @@ void find_feature_matches ( const Mat& img_1, const Mat& img_2,
 
 Point2d pixel2cam ( const Point2d& p, const Mat& K )
 {
+    // 公式推导查看ch5.1.1 式（5.7）
     return Point2d
            (
                ( p.x - K.at<double> ( 0,2 ) ) / K.at<double> ( 0,0 ),
