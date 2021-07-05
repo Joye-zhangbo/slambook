@@ -14,17 +14,19 @@ int main ( int argc, char** argv )
         return 1;
     }
     //-- 读取图像
-    Mat img_1 = imread ( argv[1], CV_LOAD_IMAGE_COLOR );
-    Mat img_2 = imread ( argv[2], CV_LOAD_IMAGE_COLOR );
+    Mat img_1 = imread ( argv[1], IMREAD_COLOR );
+    Mat img_2 = imread ( argv[2], IMREAD_COLOR );
 
     //-- 初始化
     std::vector<KeyPoint> keypoints_1, keypoints_2;
     Mat descriptors_1, descriptors_2;
+#if 1
     Ptr<FeatureDetector> detector = ORB::create();
     Ptr<DescriptorExtractor> descriptor = ORB::create();
-    // Ptr<FeatureDetector> detector = FeatureDetector::create(detector_name);
-    // Ptr<DescriptorExtractor> descriptor = DescriptorExtractor::create(descriptor_name);
-    Ptr<DescriptorMatcher> matcher  = DescriptorMatcher::create ( "BruteForce-Hamming" );
+#else   // TODO
+    Ptr<FeatureDetector> detector = FeatureDetector::create(detector_name);
+    Ptr<DescriptorExtractor> descriptor = DescriptorExtractor::create(descriptor_name);
+#endif
 
     //-- 第一步:检测 Oriented FAST 角点位置
     detector->detect ( img_1,keypoints_1 );
@@ -40,23 +42,30 @@ int main ( int argc, char** argv )
 
     //-- 第三步:对两幅图像中的BRIEF描述子进行匹配，使用 Hamming 距离
     vector<DMatch> matches;
-    //BFMatcher matcher ( NORM_HAMMING );
+#if 0
+    Ptr<DescriptorMatcher> matcher  = DescriptorMatcher::create ( "BruteForce-Hamming" );
     matcher->match ( descriptors_1, descriptors_2, matches );
+#else
+    BFMatcher matcher ( NORM_HAMMING );
+    matcher.match ( descriptors_1, descriptors_2, matches );
+#endif
 
     //-- 第四步:匹配点对筛选
     double min_dist=10000, max_dist=0;
 
     //找出所有匹配之间的最小距离和最大距离, 即是最相似的和最不相似的两组点之间的距离
+#if 0
     for ( int i = 0; i < descriptors_1.rows; i++ )
     {
         double dist = matches[i].distance;
         if ( dist < min_dist ) min_dist = dist;
         if ( dist > max_dist ) max_dist = dist;
     }
-    
+#else
     // 仅供娱乐的写法
     min_dist = min_element( matches.begin(), matches.end(), [](const DMatch& m1, const DMatch& m2) {return m1.distance<m2.distance;} )->distance;
     max_dist = max_element( matches.begin(), matches.end(), [](const DMatch& m1, const DMatch& m2) {return m1.distance<m2.distance;} )->distance;
+#endif
 
     printf ( "-- Max dist : %f \n", max_dist );
     printf ( "-- Min dist : %f \n", min_dist );
