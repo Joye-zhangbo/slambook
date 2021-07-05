@@ -188,7 +188,7 @@ cv::Mat findEssentialMat( InputArray _points1, InputArray _points2, double focal
     _points2.getMat().convertTo(points2, CV_64F);
 
     Mat fundamental_matrix;
-    fundamental_matrix = findFundamentalMat ( points1, points2, CV_FM_8POINT );
+    fundamental_matrix = findFundamentalMat ( points1, points2, FM_8POINT );
     Mat E;
     E = cameraMatrix.t()* fundamental_matrix * cameraMatrix;
     
