@@ -26,7 +26,9 @@ void Config::setParameterFile( const std::string& filename )
 {
     if ( config_ == nullptr )
         config_ = shared_ptr<Config>(new Config);
-    config_->file_ = cv::FileStorage( filename.c_str(), cv::FileStorage::READ );
+    // config_->file_ = cv::FileStorage( filename.c_str(), cv::FileStorage::READ );
+    static cv::FileStorage file1( filename.c_str(), cv::FileStorage::READ );
+    config_->file_ = file1;
     if ( config_->file_.isOpened() == false )
     {
         std::cerr<<"parameter file "<<filename<<" does not exist."<<std::endl;
